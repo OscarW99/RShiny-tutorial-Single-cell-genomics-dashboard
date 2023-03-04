@@ -1,5 +1,6 @@
 # Following this tut: https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
 
+
 library(dplyr)
 library(Seurat)
 library(patchwork)
@@ -22,8 +23,8 @@ pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
 # pbmc <- JackStraw(pbmc, num.replicate = 100)
 # pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
 
-remove.packages(grep("Matrix", installed.packages(), value = T))
-install.packages('Matrix')
+# remove.packages(grep("Matrix", installed.packages(), value = T))
+# install.packages('Matrix')
 
 
 pbmc <- FindNeighbors(pbmc, dims = 1:10)
@@ -35,10 +36,18 @@ new.cluster.ids <- c("Naive CD4 T", "CD14+ Mono", "Memory CD4 T", "B", "CD8 T", 
     "NK", "DC", "Platelet")
 names(new.cluster.ids) <- levels(pbmc)
 pbmc <- RenameIdents(pbmc, new.cluster.ids)
+pbmc$celltype <- Idents(pbmc)
 
 
 # Randomly assign cells: Age, Sex, sampleID
-# Assign cells: celltype
+set.seed(123) # for reproducibility
+sex <- sample(c("male", "female"), ncol(pbmc), replace = TRUE)
+age <- round(runif(ncol(pbmc), 18, 65))
+sampleID <- paste0("sample", sample(1:10, ncol(pbmc), replace = TRUE))
 
+pbmc$sex <- sex
+pbmc$age <- age
+pbmc$sampleID <- sampleID
 
-# saveRDS(pbmc, file = "../output/pbmc_tutorial.rds")
+saveRDS(pbmc, file = r"(C:\Users\Oscar Wright\OneDrive - Rancho BioSciences\Documents\PGS\Side_stuff\RShiny_tutorial\RShiny-tutorial-Single-cell-genomics-dashboard\seurat_object.rds)")
+# obj <- readRDS(r"(C:\Users\Oscar Wright\OneDrive - Rancho BioSciences\Documents\PGS\Side_stuff\RShiny_tutorial\RShiny-tutorial-Single-cell-genomics-dashboard\seurat_object.rds)")

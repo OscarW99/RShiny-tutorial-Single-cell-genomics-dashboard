@@ -1,17 +1,8 @@
 
 source('global.R')
-library(dplyr)
-library(shinyjs)
-library(shiny)
-library(DT)
-library(shinydashboard)
-library(shinydashboardPlus)
-library(ggplot2)
-library(shinybusy)
-library(glue)
 
 ui <- dashboardPage(
-    dashboardHeader(title = "Sngle Cell RNAseq Analysis"),
+    dashboardHeader(title = "scRNAseq Analysis"),
     dashboardSidebar(
     tags$head(
     tags$style(HTML(".skin-blue .main-header .sidebar-toggle {display: none;}"))
@@ -22,9 +13,9 @@ ui <- dashboardPage(
         menuItem("scRNAseq Analyzer", tabName = "input", icon = icon("edit")),
         conditionalPanel(condition = "input.tab == 'input'",
             div(
-                fileInput("file", "Upload File", multiple=TRUE, accept=c('.Rda')),
+                fileInput("file", "Upload File", multiple=TRUE, accept=c('.rds')),
                 actionButton("reset", "Reset", icon = icon("undo"), style = "color: #fff; background-color: #dc3545; width: 87.25%"),
-                actionButton("run", "Run", icon = icon("play"), style = "color: #fff; background-color: #28a745; width: 87.25%"),
+                actionButton("run", "Run", icon = icon("play"), style = "color: #fff; background-color: #28a745; width: 87.25%")
                 )
             )
     )
@@ -34,10 +25,9 @@ ui <- dashboardPage(
                 tabItem(tabName = "input", # tabItem refers to tab in sidebar (not main panel)
                 h2("Output"),
                 tabsetPanel(id = 'main_tabs',
-                    tabPanel("Instructions", br(), h2("Instructions - Inputs"), br(),p(style="font-size:20px;",
-                            "- Upload a Seurat object and click Submit!", br(), 
-                            "- Press the 'Reset' button to clear file inputs.", br(), 
-                            ))
+                    tabPanel("Instructions",
+                            includeMarkdown("./markdown/instructions.md")
+                            )
                         )
                     ),
                 tabItem(tabName = "home", # tabItem refers to tab in sidebar (not main panel)
@@ -49,6 +39,7 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+    options(shiny.maxRequestSize=300*1024^2)
 
     values <- reactiveValues()
 
@@ -62,6 +53,103 @@ server <- function(input, output, session) {
         shinyjs::disable("run")
     }
     })
+
+    observeEvent(input$run, {
+        shinyjs::disable("run")
+
+        # Clear tabs before 'Run Experiment' is ran another time
+        removeTab("main_tabs", "UMAP")
+        removeTab("main_tabs", "Gene Expression")
+
+        show_modal_spinner(text = "Preparing plots...")
+
+        obj <- load_seurat_obj(input$file$datapath)
+        if (is.vector(obj)){
+            showModal(modalDialog(
+                title = "Error with file",
+                HTML("<h5>There is an error with the file you uploaded. See below for more details.</h5><br>",
+                    paste(unlist(obj), collapse = "<br><br>"))
+            ))
+            shinyjs::enable("run")
+
+        } else {
+            
+            output$umap <- renderPlot({
+                if (!is.null(input$metadata_col)) {
+                    create_metadata_UMAP(obj, input$metadata_col)
+                }
+            })
+
+            output$featurePlot <- renderPlot({
+                if (!is.null(input$gene)) {
+                    create_feature_plot(obj, input$gene)
+                }
+            })
+
+            insertTab(
+                inputId = "main_tabs",
+                tabPanel(
+                    "UMAP",
+                    fluidRow(
+                    column(
+                        width = 8,
+                        plotOutput(outputId = 'umap')
+                    ),
+                    column(
+                        width = 4,
+                        selectizeInput("metadata_col", 
+                            "Metadata Column", 
+                            colnames(obj@meta.data)
+                        )
+                    )
+                    ),
+                    style = "height: 90%; width: 95%; padding-top: 5%;"
+                ),
+                select = TRUE
+            )
+            insertTab(
+                inputId = "main_tabs",
+                tabPanel(
+                    "Gene Expression",
+                    fluidRow(
+                    column(
+                        width = 8,
+                        plotOutput(outputId = 'featurePlot')
+                    ),
+                    column(
+                        width = 4,
+                        selectizeInput("gene", 
+                            "Genes", 
+                            rownames(obj)
+                        )
+                    )
+                    ),
+                    style = "height: 90%; width: 95%; padding-top: 5%;"
+                )
+            )
+
+            remove_modal_spinner()
+            shinyjs::enable("run")
+            
+        }
+    })
+
+    # Clear all sidebar inputs when 'Reset' button is clicked
+    observeEvent(input$reset, {
+        shinyjs::reset("file")
+        removeTab("main_tabs", "UMAP")
+        removeTab("main_tabs", "Gene Expression")
+        shinyjs::disable("run")
+    })
+
 }
 
 shinyApp(ui, server)
+
+
+# TODO - change color scheme to look a lot different.
+
+
+
+
+# By default, Shiny limits file uploads to 5MB per file. You can modify this limit by using the shiny.maxRequestSize option. For example, adding options(shiny.maxRequestSize=30*1024^2) to the top of server.R would increase the limit to 30MB.
