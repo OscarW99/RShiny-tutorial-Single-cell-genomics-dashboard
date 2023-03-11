@@ -84,6 +84,25 @@ server <- function(input, output, session) {
                 }
             })
 
+            output$downloadFeaturePlot <- downloadHandler(
+                filename = function(){
+                    paste0(input$gene, '_feature_plot', '.png')
+                },
+                content = function(file){
+                    plot <- create_feature_plot(obj, input$gene)
+                    ggsave(filename=file, width = 10, height = 5, type = "cairo")
+                }
+            )
+            output$download_umap <- downloadHandler(
+                filename = function(){
+                    paste0(input$metadata_col, '_UMAP', '.png')
+                },
+                content = function(file){
+                    plot <- create_metadata_UMAP(obj, input$metadata_col)
+                    ggsave(filename=file, width = 10, height = 5, type = "cairo")
+                }
+            )
+
             insertTab(
                 inputId = "main_tabs",
                 tabPanel(
@@ -91,7 +110,8 @@ server <- function(input, output, session) {
                     fluidRow(
                     column(
                         width = 8,
-                        plotOutput(outputId = 'umap')
+                        plotOutput(outputId = 'umap'),
+                        downloadButton("download_umap", "Download UMAP")
                     ),
                     column(
                         width = 4,
@@ -112,7 +132,8 @@ server <- function(input, output, session) {
                     fluidRow(
                     column(
                         width = 8,
-                        plotOutput(outputId = 'featurePlot')
+                        plotOutput(outputId = 'featurePlot'),
+                        downloadButton("downloadFeaturePlot", "Download Feature Plot")
                     ),
                     column(
                         width = 4,
