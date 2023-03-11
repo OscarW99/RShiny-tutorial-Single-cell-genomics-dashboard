@@ -11,6 +11,7 @@ library(ggplot2)
 library(shinybusy)
 library(glue)
 library(markdown)
+library(ggthemes)
 
 
 # Read in file and perform validation.
@@ -70,12 +71,4 @@ create_feature_plot <- function(obj, gene) {
         theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
     }
     return(FP)
-}
-
-get_meta_cols <- function(obj){
-    return(colnames(obj@meta.data))
-}
-
-get_genes <- function(obj){
-    return(rownames(obj))
 }

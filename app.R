@@ -4,26 +4,25 @@ source('global.R')
 ui <- dashboardPage(
     dashboardHeader(title = "scRNAseq Analysis"),
     dashboardSidebar(
-    tags$head(
-    tags$style(HTML(".skin-blue .main-header .sidebar-toggle {display: none;}"))
-    ),
-    sidebarMenu(id='tab',
-        useShinyjs(),
-        menuItem("Home Page", tabName = "home", icon = icon("list")),
-        menuItem("scRNAseq Analyzer", tabName = "input", icon = icon("edit")),
-        conditionalPanel(condition = "input.tab == 'input'",
-            div(
-                fileInput("file", "Upload File", multiple=TRUE, accept=c('.rds')),
-                actionButton("reset", "Reset", icon = icon("undo"), style = "color: #fff; background-color: #dc3545; width: 87.25%"),
-                actionButton("run", "Run", icon = icon("play"), style = "color: #fff; background-color: #28a745; width: 87.25%")
+        tags$head(
+        tags$style(HTML(".skin-blue .main-header .sidebar-toggle {display: none;}"))
+        ),
+        sidebarMenu(id='tab',
+            useShinyjs(),
+            menuItem("Home Page", tabName = "home", icon = icon("list")),
+            menuItem("scRNAseq Analyzer", tabName = "input", icon = icon("edit")),
+            conditionalPanel(condition = "input.tab == 'input'",
+                div(
+                    fileInput("file", "Upload File", multiple=TRUE, accept=c('.rds')),
+                    actionButton("reset", "Reset", icon = icon("undo"), style = "color: #fff; background-color: #dc3545; width: 87.25%"),
+                    actionButton("run", "Run", icon = icon("play"), style = "color: #fff; background-color: #28a745; width: 87.25%")
+                    )
                 )
-            )
-    )
+        )
     ),
     dashboardBody(
             tabItems(
                 tabItem(tabName = "input", # tabItem refers to tab in sidebar (not main panel)
-                h2("Output"),
                 tabsetPanel(id = 'main_tabs',
                     tabPanel("Instructions",
                             includeMarkdown("./markdown/instructions.md")
@@ -35,7 +34,6 @@ ui <- dashboardPage(
                 )
                 )
             )         
-            
 )
 
 server <- function(input, output, session) {
