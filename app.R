@@ -19,7 +19,7 @@ ui <- dashboardPage(
                     )
                 )
         )
-    ),
+    ), 
     dashboardBody(
             tabItems(
                 tabItem(tabName = "input", # tabItem refers to tab in sidebar (not main panel)
@@ -29,7 +29,7 @@ ui <- dashboardPage(
                             )
                         )
                     ),
-                tabItem(tabName = "home", # tabItem refers to tab in sidebar (not main panel)
+                tabItem(tabName = "home",
                 tags$h1(HTML("<u>Welcome to The scRNAseq Suerat analysis RShiny app</u>")),
                 )
                 )
@@ -55,7 +55,7 @@ server <- function(input, output, session) {
     observeEvent(input$run, {
         shinyjs::disable("run")
 
-        # Clear tabs before 'Run Experiment' is ran another time
+        # Clear tabs before 'Run' is ran another time
         removeTab("main_tabs", "UMAP")
         removeTab("main_tabs", "Gene Expression")
 
@@ -166,9 +166,6 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 
-# TODO - change color scheme to look a lot different.
-
-
-
-
 # By default, Shiny limits file uploads to 5MB per file. You can modify this limit by using the shiny.maxRequestSize option. For example, adding options(shiny.maxRequestSize=30*1024^2) to the top of server.R would increase the limit to 30MB.
+
+# shinyjs lets you perform common useful JavaScript operations in Shiny applications without having to know any JavaScript
