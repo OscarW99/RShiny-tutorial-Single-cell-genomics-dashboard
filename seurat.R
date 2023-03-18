@@ -6,7 +6,7 @@ library(Seurat)
 library(patchwork)
 
 # Load the PBMC dataset
-pbmc.data <- Read10X(data.dir = r"(C:\Users\Oscar Wright\OneDrive - Rancho BioSciences\Documents\PGS\Side_stuff\RShiny_tutorial\RShiny-tutorial-Single-cell-genomics-dashboard\filtered_gene_bc_matrices\hg19/)")
+pbmc.data <- Read10X(data.dir = r"(C:\Users\Oscar Wright\Documents\youtube\RShiny_dashboard\pbmc3k_filtered_gene_bc_matrices\filtered_gene_bc_matrices\hg19)")
 
 # Initialize the Seurat object with the raw (non-normalized data).
 pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
@@ -19,13 +19,6 @@ pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
 all.genes <- rownames(pbmc)
 pbmc <- ScaleData(pbmc, features = all.genes)
 pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
-
-# pbmc <- JackStraw(pbmc, num.replicate = 100)
-# pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
-
-# remove.packages(grep("Matrix", installed.packages(), value = T))
-# install.packages('Matrix')
-
 
 pbmc <- FindNeighbors(pbmc, dims = 1:10)
 pbmc <- FindClusters(pbmc, resolution = 0.5)
@@ -49,5 +42,4 @@ pbmc$sex <- sex
 pbmc$age <- age
 pbmc$sampleID <- sampleID
 
-saveRDS(pbmc, file = r"(C:\Users\Oscar Wright\OneDrive - Rancho BioSciences\Documents\PGS\Side_stuff\RShiny_tutorial\RShiny-tutorial-Single-cell-genomics-dashboard\seurat_object.rds)")
-# obj <- readRDS(r"(C:\Users\Oscar Wright\OneDrive - Rancho BioSciences\Documents\PGS\Side_stuff\RShiny_tutorial\RShiny-tutorial-Single-cell-genomics-dashboard\seurat_object.rds)")
+saveRDS(pbmc, file = r"(C:\Users\Oscar Wright\Documents\youtube\RShiny_dashboard\seurat_object.rds)")
